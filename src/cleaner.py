@@ -89,6 +89,30 @@ def clean_corpus(df_corpus, cleaner):
                             'rate': df_corpus["rate"]})
     return newCorpus
 
+def clean_corpus_neutral(df_corpus, cleaner):
+    debug("[Limpiando el corpus...]")
+     
+    debug("[Usando " + str(partitions) + " threads ...]")
+
+    cleaned = parallelize(df_corpus["raw"], cleaner)
+    newCorpus = pd.DataFrame({'content': cleaned,
+                            'raw': df_corpus["raw"],
+                            'human_rate': df_corpus["human_rate"]})
+    return newCorpus
+
+def clean_corpus_human(df_corpus, cleaner):
+    debug("[Limpiando el corpus clasificado por humanos...]")
+     
+    debug("[Usando " + str(partitions) + " threads ...]")
+
+    cleaned = parallelize(df_corpus["raw"], cleaner)
+    newCorpus = pd.DataFrame({'content': cleaned,
+                            'sentiment': df_corpus['human_rate'].map(sentiment_to_vector),
+                            'raw': df_corpus["raw"],
+                            'rate': df_corpus["rate"],
+                            'human_rate': df_corpus["human_rate"]})
+    return newCorpus
+
 def clean_corpus_basic(df_corpus):
     debug("[Usando cleaner basico]")
     return clean_corpus(df_corpus, clean_series)
@@ -96,3 +120,12 @@ def clean_corpus_basic(df_corpus):
 def clean_corpus_standford(df_corpus):
     debug("[Usando pos-tagger]")
     return clean_corpus(df_corpus, clean_series_standford)
+
+def clean_corpus_basic_neutral(df_corpus):
+    debug("[Usando cleaner basico para samples neutrales]")
+    return clean_corpus_neutral(df_corpus, clean_series)
+    
+def clean_corpus_basic_human(df_corpus):
+    debug("[Usando cleaner basico para samples clasificados por humanos]")
+    return clean_corpus_human(df_corpus, clean_series)
+
